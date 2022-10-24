@@ -28,9 +28,17 @@ public slots:
   void editingSceneLeft(const Ray&);
   void editingSceneRight(const Ray&);
   void BoxMeshExample();
+  void SphereMesh();
+  void CylinderMesh();
+  void CapsuleMesh();
+  void TorusMesh();
   void SphereImplicitExample();
   void ResetCamera();
   void UpdateMaterial();
+  void MergedMesh();
+  void WrappedMesh();
+  //void RandomCamera();
+  //void RotationPx();
 };
 
 #endif

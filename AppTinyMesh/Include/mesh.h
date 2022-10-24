@@ -1,6 +1,10 @@
 #pragma once
 
 #include "box.h"
+#include "sphere.h"
+#include "cylinder.h"
+#include "capsule.h"
+#include "torus.h"
 #include "ray.h"
 #include "mathematics.h"
 
@@ -115,11 +119,21 @@ public:
   Box GetBox() const;
 
   void Scale(double);
+  void Translate(const Vector&);
+  void Rotate(const Vector&, double);
+  void Rotate(const Matrix&);
+  void SphereWrap(const Sphere&);
+
+  void Merge(const Mesh&, const Mesh&);
 
   void SmoothNormals();
 
   // Constructors from core classes
   explicit Mesh(const Box&);
+  explicit Mesh(const Sphere&, int = 31, int = 31);
+  explicit Mesh(const Cylinder&, int = 31, int = -1);
+  explicit Mesh(const Capsule&, int = 31, int = -1);
+  explicit Mesh(const Torus&, int = 31,int = 31);
 
   void Load(const QString&);
   void SaveObj(const QString&, const QString&) const;

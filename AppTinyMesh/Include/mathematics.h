@@ -88,7 +88,7 @@ class Vector
 protected:
   double c[3]; //!< Components.
 public:
-  //! Empty 
+  //! Empty
   Vector() {}
 
   explicit Vector(double);
@@ -453,4 +453,237 @@ The values are given in trigonometric order.
 inline Vector Vector::Bilinear(const Vector& a00, const Vector& a10, const Vector& a11, const Vector& a01, double u, double v)
 {
   return (1 - u) * (1 - v) * a00 + (1 - u) * (v)*a01 + (u) * (1 - v) * a10 + (u) * (v)*a11;
+}
+
+
+
+// Class Matrix (for homotheties and rotations)
+
+class Matrix
+{
+protected:
+  double comp[3][3]; //!< Components.
+  bool isRotation; //!< True if the matrix is a rotation matrix.
+  bool isHomothety; //!< True if the matrix is a homothety matrix.
+public:
+  //! Empty
+  Matrix() {}
+
+  // Common matrix initializations
+  explicit Matrix(double (*)[3], bool, bool);
+  explicit Matrix(double, double, double, double, double, double, double, double, double, bool, bool);
+
+  // Rotation matrices
+  explicit Matrix(const Vector&, double);
+
+  // Homothetie matrices
+  explicit Matrix(double);
+
+
+  // Access members
+  double* operator[] (int);
+  const double* operator[] (int) const;
+
+
+  // Binary operators
+  friend Matrix operator* (const Matrix&, const Matrix&);
+
+  friend Matrix operator* (const Matrix&, double);
+  friend Vector operator* (const Matrix&, const Vector&);
+  friend Matrix operator* (double, const Matrix&);
+  friend Matrix operator/ (const Matrix&, double);
+
+
+  // Norm (Fronebenius)
+  friend double Norm(const Matrix&);
+  friend double SquaredNorm(const Matrix&);
+
+  // Transpose and inverse
+  friend Matrix Transpose(const Matrix&);
+  friend Matrix Inverse(const Matrix&);
+
+
+  friend std::ostream& operator<<(std::ostream&, const Matrix&);
+
+public:
+  static const Matrix Null; //!< Null matrix.
+  static const Matrix Id; //!< Identity matrix.
+};
+
+/*!
+\brief Create a matrix.
+*/
+inline Matrix::Matrix(double a[3][3], bool r, bool h)
+{
+  comp[0][0] = a[0][0];
+  comp[0][1] = a[0][1];
+  comp[0][2] = a[0][2];
+  comp[1][0] = a[1][0];
+  comp[1][1] = a[1][1];
+  comp[1][2] = a[1][2];
+  comp[2][0] = a[2][0];
+  comp[2][1] = a[2][1];
+  comp[2][2] = a[2][2];
+  isRotation = r;
+  isHomothety = h;
+}
+
+/*!
+\brief Create a matrix.
+*/
+inline Matrix::Matrix(double a, double b, double c, double d, double e, double f, double g, double h, double i, bool rot, bool hom)
+{
+  comp[0][0] = a;
+  comp[0][1] = b;
+  comp[0][2] = c;
+  comp[1][0] = d;
+  comp[1][1] = e;
+  comp[1][2] = f;
+  comp[2][0] = g;
+  comp[2][1] = h;
+  comp[2][2] = i;
+  isRotation = rot;
+  isHomothety = hom;
+}
+
+/*!
+\brief Create a matrix with the same coordinates.
+\param a Real.
+*/
+inline Matrix::Matrix(double a)
+{
+  isRotation = false;
+  isHomothety = true;
+  comp[0][0] = comp[1][1] = comp[2][2] = a;
+  comp[0][1] = comp[0][2] = comp[1][0] = comp[1][2] = comp[2][0] = comp[2][1] = 0.0;
+}
+
+/*!
+\brief Create a rotation matrix from an angle and an axe.
+\param a Real.
+\param axe Axe of rotation.
+*/
+inline Matrix::Matrix(const Vector& axe, double a)
+{
+  isRotation = true;
+  isHomothety = false;
+  Vector u = Normalized(axe);
+  double c = cos(a);
+  double s = sin(a);
+  double t = 1.0 - c;
+  double x = u[0];
+  double y = u[1];
+  double z = u[2];
+
+  comp[0][0] = t * x * x + c;
+  comp[0][1] = t * x * y - s * z;
+  comp[0][2] = t * x * z + s * y;
+  comp[1][0] = t * x * y + s * z;
+  comp[1][1] = t * y * y + c;
+  comp[1][2] = t * y * z - s * x;
+  comp[2][0] = t * x * z - s * y;
+  comp[2][1] = t * y * z + s * x;
+  comp[2][2] = t * z * z + c;
+}
+
+//! Gets the i-th coordinate of matrix.
+inline double* Matrix::operator[] (int i)
+{
+  return comp[i];
+}
+
+//! Returns the i-th coordinate of matrix.
+inline const double* Matrix::operator[] (int i) const
+{
+  return comp[i];
+}
+
+// Unary operators
+
+
+//! Matrix product.
+inline Matrix operator* (const Matrix& u, const Matrix& v)
+{
+  bool r = u.isRotation && v.isRotation;
+  bool h = u.isHomothety && v.isHomothety;
+  double tmp_comp[3][3];
+  tmp_comp[0][0] = u.comp[0][0] * v.comp[0][0] + u.comp[0][1] * v.comp[1][0] + u.comp[0][2] * v.comp[2][0];
+  tmp_comp[0][1] = u.comp[0][0] * v.comp[0][1] + u.comp[0][1] * v.comp[1][1] + u.comp[0][2] * v.comp[2][1];
+  tmp_comp[0][2] = u.comp[0][0] * v.comp[0][2] + u.comp[0][1] * v.comp[1][2] + u.comp[0][2] * v.comp[2][2];
+  tmp_comp[1][0] = u.comp[1][0] * v.comp[0][0] + u.comp[1][1] * v.comp[1][0] + u.comp[1][2] * v.comp[2][0];
+  tmp_comp[1][1] = u.comp[1][0] * v.comp[0][1] + u.comp[1][1] * v.comp[1][1] + u.comp[1][2] * v.comp[2][1];
+  tmp_comp[1][2] = u.comp[1][0] * v.comp[0][2] + u.comp[1][1] * v.comp[1][2] + u.comp[1][2] * v.comp[2][2];
+  tmp_comp[2][0] = u.comp[2][0] * v.comp[0][0] + u.comp[2][1] * v.comp[1][0] + u.comp[2][2] * v.comp[2][0];
+  tmp_comp[2][1] = u.comp[2][0] * v.comp[0][1] + u.comp[2][1] * v.comp[1][1] + u.comp[2][2] * v.comp[2][1];
+  tmp_comp[2][2] = u.comp[2][0] * v.comp[0][2] + u.comp[2][1] * v.comp[1][2] + u.comp[2][2] * v.comp[2][2];
+  return Matrix(tmp_comp, r, h);
+}
+
+inline Vector operator* (const Matrix& u, const Vector& v)
+{
+  return Vector(u.comp[0][0] * v[0] + u.comp[0][1] * v[1] + u.comp[0][2] * v[2],
+                u.comp[1][0] * v[0] + u.comp[1][1] * v[1] + u.comp[1][2] * v[2],
+                u.comp[2][0] * v[0] + u.comp[2][1] * v[1] + u.comp[2][2] * v[2]);
+}
+
+//! Right multiply by a scalar.
+inline Matrix operator* (const Matrix& u, double a)
+{
+  return Matrix(u.comp[0][0] * a, u.comp[0][1] * a, u.comp[0][2] * a, u.comp[1][0] * a, u.comp[1][1] * a, u.comp[1][2] * a, u.comp[2][0] * a, u.comp[2][1] * a, u.comp[2][2] * a, u.isRotation, u.isHomothety);
+}
+
+//! Left multiply by a scalar.
+inline Matrix operator* (double a, const Matrix& u)
+{
+  return u * a;
+}
+
+
+//! Left multiply by a scalar
+inline Matrix operator/ (const Matrix& u, double a)
+{
+  return u * (1.0 / a);
+}
+
+
+/*!
+\brief Compute the Euclidean norm of a matrix.
+
+This function involves a square root computation, it is in general more efficient to rely on
+the squared norm of a matrix instead.
+\param u %Matrix.
+\sa SquaredNorm
+*/
+inline double Norm(const Matrix& u)
+{
+  return sqrt(SquaredNorm(u));
+}
+
+/*!
+\brief Compute the squared Euclidean norm of a matrix.
+\param u %Matrix.
+\sa Norm
+*/
+inline double SquaredNorm(const Matrix& u)
+{
+  return u.comp[0][0] * u.comp[0][0] + u.comp[0][1] * u.comp[0][1] + u.comp[0][2] * u.comp[0][2] + u.comp[1][0] * u.comp[1][0] + u.comp[1][1] * u.comp[1][1] + u.comp[1][2] * u.comp[1][2] + u.comp[2][0] * u.comp[2][0] + u.comp[2][1] * u.comp[2][1] + u.comp[2][2] * u.comp[2][2];
+}
+
+
+inline Matrix Transpose(const Matrix& u)
+{
+  return Matrix(u.comp[0][0], u.comp[1][0], u.comp[2][0], u.comp[0][1], u.comp[1][1], u.comp[2][1], u.comp[0][2], u.comp[1][2], u.comp[2][2], u.isRotation, u.isHomothety);
+}
+
+inline Matrix Inverse(const Matrix& u)
+{
+  if (u.isHomothety){
+    return Matrix(1.0 / u.comp[0][0], 0.0, 0.0, 0.0, 1.0 / u.comp[1][1], 0.0, 0.0, 0.0, 1.0 / u.comp[2][2], u.isRotation, u.isHomothety);
+  }
+  else if (u.isRotation){
+    return Transpose(u);
+  }
+  else {
+    throw std::invalid_argument("Matrix::Inverse: not implemented");
+  }
 }

@@ -132,6 +132,97 @@ p, li { white-space: pre-wrap; }
         <bool>false</bool>
        </property>
       </widget>
+      <widget class="QPushButton" name="sphereMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>90</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Sphere Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="cylinderMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>140</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cylinder Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="capsuleMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>190</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Capsule Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="torusMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Torus Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="wrappedMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>280</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Wrapped Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="mergedMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>320</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Merge Mesh</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="rotationPx">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>50</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>rotation+x</string>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
@@ -293,13 +384,14 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>

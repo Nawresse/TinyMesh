@@ -29,8 +29,16 @@ void MainWindow::CreateActions()
 {
 	// Buttons
     connect(uiw->boxMesh, SIGNAL(clicked()), this, SLOT(BoxMeshExample()));
+
+    connect(uiw->sphereMesh, SIGNAL(clicked()), this, SLOT(SphereMesh()));
+    connect(uiw->cylinderMesh, SIGNAL(clicked()), this, SLOT(CylinderMesh()));
+    connect(uiw->capsuleMesh, SIGNAL(clicked()), this, SLOT(CapsuleMesh()));
+    connect(uiw->torusMesh, SIGNAL(clicked()), this, SLOT(TorusMesh()));
+    connect(uiw->wrappedMesh, SIGNAL(clicked()), this, SLOT(WrappedMesh()));
+    connect(uiw->mergedMesh, SIGNAL(clicked()), this, SLOT(MergedMesh()));
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
+    //connect(uiw->rotationPx, SIGNAL(clicked()), this, SLOT(RotationPx()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_2, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -51,15 +59,85 @@ void MainWindow::editingSceneRight(const Ray&)
 void MainWindow::BoxMeshExample()
 {
 	Mesh boxMesh = Mesh(Box(1.0));
-
-	std::vector<Color> cols;
-	cols.resize(boxMesh.Vertexes());
-    for (size_t i = 0; i < cols.size(); i++)
-		cols[i] = Color(double(i) / 6.0, fmod(double(i) * 39.478378, 1.0), 0.0);
-
-	meshColor = MeshColor(boxMesh, cols, boxMesh.VertexIndexes());
+    meshColor = MeshColor(boxMesh);
 	UpdateGeometry();
 }
+
+void MainWindow::SphereMesh()
+{
+    Sphere sphere = Sphere(Vector(1.0),1.0);
+    Mesh sphereMesh = Mesh(sphere,31,31);
+    meshColor = MeshColor(sphereMesh);
+    UpdateGeometry();
+}
+void MainWindow::CylinderMesh()
+{
+    Mesh cylinderMesh = Mesh(Cylinder(Vector::Null));
+    meshColor = MeshColor(cylinderMesh);
+    UpdateGeometry();
+}
+void MainWindow::CapsuleMesh()
+{
+    Mesh capsuleMesh = Mesh(Capsule(Vector::Null));
+    meshColor = MeshColor(capsuleMesh);
+    UpdateGeometry();
+}
+void MainWindow::TorusMesh()
+{
+    Torus torus = Torus(1.0,2.0);
+    Mesh torusMesh = Mesh(torus,31,31);
+   // meshColor = MeshColor(torusMesh);
+   // UpdateGeometry();
+
+}
+
+void MainWindow::MergedMesh()
+{
+    Torus torus = Torus(Vector(0.0) , 2.0, 0.1);
+    Mesh torusMesh = Mesh(torus, 61);
+
+    Sphere sphere = Sphere(1.5);
+    Mesh sphereMesh = Mesh(sphere, 31);
+
+    Mesh mergedMesh;
+    mergedMesh.Merge(sphereMesh, torusMesh);
+
+    std::vector<Color> cols;
+    cols.resize(mergedMesh.Vertexes());
+    for (int i = 0; i < cols.size(); i++)
+        cols[i] = Color(double(i) / 6.0, fmod(double(i) * 39.478378, 1.0), 0.0);
+
+    meshColor = MeshColor(mergedMesh, cols, mergedMesh.VertexIndexes());
+    UpdateGeometry();
+
+}
+
+void MainWindow::WrappedMesh()
+{
+
+    Sphere sphere = Sphere(1);
+    sphere.Translate(Vector(0.5, 0.0, 0.0));
+
+    Capsule capsule = Capsule(Vector(0.0) , 2.0, 1.0);
+    Mesh capsuleMesh = Mesh(capsule, 31);
+    capsuleMesh.SphereWrap(sphere);
+
+    std::vector<Color> cols;
+    cols.resize(capsuleMesh.Vertexes());
+    for (int i = 0; i < cols.size(); i++)
+        cols[i] = Color(double(i) / 6.0, fmod(double(i) * 39.478378, 1.0), 0.0);
+
+    meshColor = MeshColor(capsuleMesh, cols, capsuleMesh.VertexIndexes());
+    UpdateGeometry();
+
+}
+/*void MainWindow::RandomCamera()
+{
+    double theta = 2.0 * M_PI/12;
+    Vector axis = Vector::X; // l'axe unitaire selon X
+    Vector currentView
+    meshWidget->SetCamera(Camera(Matrix(axis, theta) * Vector(-10.0), Vector(0.0)));
+}*/
 
 void MainWindow::SphereImplicitExample()
 {
@@ -76,6 +154,7 @@ void MainWindow::SphereImplicitExample()
   meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
   UpdateGeometry();
 }
+
 
 void MainWindow::UpdateGeometry()
 {
