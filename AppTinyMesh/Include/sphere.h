@@ -15,6 +15,7 @@ protected:
 public:
   //! Empty.
   Sphere() {}
+  Sphere(const Vector& c);
   explicit Sphere(const Vector&, double);
   explicit Sphere(double);
 

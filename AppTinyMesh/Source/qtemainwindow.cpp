@@ -86,8 +86,8 @@ void MainWindow::TorusMesh()
 {
     Torus torus = Torus(1.0,2.0);
     Mesh torusMesh = Mesh(torus,31,31);
-   // meshColor = MeshColor(torusMesh);
-   // UpdateGeometry();
+    meshColor = MeshColor(torusMesh);
+    UpdateGeometry();
 
 }
 
