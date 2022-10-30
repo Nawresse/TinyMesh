@@ -118,13 +118,22 @@ void Sphere::Scale(double s)
   r *= abs(s);
 }
 
-Vector Sphere::Wrap(const Vector& v) const
+/*!
+\brief Wrap from a sphere.
+\param vTrans Transformation vector (unitary).
+\param v Point to wrap.
+*/
+void Sphere::Wrap(const Vector& vTrans, const Vector& v, Vector& vTemp) const
 {
-  Vector w = v - this->c; // we calculate the distance
-  double d = Norm(w); // then we take the norm of the distance
-  if (d > this->r)
+  Vector w = v - c;
+  double d = Norm(w);
+  if (d >= r)
   {
-    w *= this->r / d;
+    vTemp = v;
   }
-  return w + this->c;
+  else
+  {
+    vTemp = v + vTrans * (1 - d / r);
+  }
 }
+

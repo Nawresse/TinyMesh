@@ -109,7 +109,7 @@ void Mesh::AddSmoothTriangle(int a, int na, int b, int nb, int c, int nc)
 */
 void Mesh::AddTriangle(int a, int b, int c, int n)
 {
-  varray.push_back(a); // pourquoi ici on push un sommet 1 normal, 1sommet 1normal
+  varray.push_back(a);
   narray.push_back(n);
   varray.push_back(b);
   narray.push_back(n);
@@ -208,65 +208,68 @@ Mesh::Mesh(const Box& box)
 
 The object has (n-2)*n+2 vertices, n*(n-1) normals and 2*n*(n-2) triangles.
 \param sphere The sphere.
-\param nc The number of circles.
-\param npc The number of subdivisions per circle.
+\param n The number of subdivisions.
 */
 Mesh::Mesh(const Sphere& sphere, int nc, int npc)
 {
-if (nc < 3) // Pour éviter une boucle vide , évider une discrétisation qui n'a pas de sens
- {
+  if (npc == -1)
+  {
+    npc = nc;
+  }
+  if (nc < 3)
+  {
     nc = 3;
- }
-if (npc <3){
-
+  }
+  if (npc < 3)
+  {
     npc = 3;
-}
-  double r = sphere.Radius(); // on declare le rayon de la sphere
-  Vector c = sphere.Center(); // ici on déclare le centre de la sphere
+  }
+  double r = sphere.Radius();
+  Vector c = sphere.Center();
   // Reserve space for the triangle array
   varray.reserve(2 * npc * (nc - 2) * 3);
   narray.reserve(2 * npc * (nc - 2) * 3);
+  // Reserve space for the vertices and normals
+  vertices.reserve((nc - 2) * npc + 2);
+  normals.reserve((nc - 2) * npc + 2);
 
   // Create the vertices
-  vertices.push_back(c + Vector(0, 0, r)); // pôle nord
+  vertices.push_back(c + Vector(0, 0, r));
+  normals.push_back(Vector(0, 0, 1));
   for (int i=1; i<nc-1; i++)
   {
     double theta = M_PI * i / (nc-1);
-    double rho = r * sin(theta); // projection dans le plan x y
-    double z = r * cos(theta); // projection sur l'axe z
+    double rho = r * sin(theta);
+    double z = r * cos(theta);
     for (int j=0; j<npc; j++)
     {
       double phi = 2 * M_PI * j / npc;
       double x = rho * cos(phi);
       double y = rho * sin(phi);
       vertices.push_back(c + Vector(x, y, z));
+      normals.push_back(Vector(x, y, z)/r);
     }
   }
-  vertices.push_back(c + Vector(0, 0, -r)); // pôle sud
+  vertices.push_back(c + Vector(0, 0, -r));
+  normals.push_back(Vector(0, 0, -1));
 
   // Create the triangles and normals
   Triangle t; // Temporary triangle to compute the normals
   for (int j=0; j<npc; j++)
   {
-    t = Triangle(vertices[0], vertices[j+1], vertices[(j+1)%npc+1]);
-    normals.push_back(t.Normal());
-    AddTriangle(0, j+1, (j+1)%npc+1, j);
+    AddSmoothTriangle(0, 0, j+1, j+1, (j+1)%npc+1, (j+1)%npc+1);
   }
-  for (int i=1; i<nc-2; i++)
+  for (int i=0; i<nc-3; i++)
   {
     for (int j=0; j<npc; j++)
     {
-      t = Triangle(vertices[(i-1)*npc+j+1], vertices[i*npc+j+1], vertices[i*npc+(j+1)%npc+1]);
-      normals.push_back(t.Normal());
-      AddTriangle((i-1)*npc+j+1, i*npc+j+1, i*npc+(j+1)%npc+1, (i-1)*npc+j+npc);
-      AddTriangle((i-1)*npc+j+1, i*npc+(j+1)%npc+1, (i-1)*npc+(j+1)%npc+1, (i-1)*npc+j+npc);
+      AddSmoothTriangle(i*npc+j+1, i*npc+j+1, i*npc+(j+1)%npc+1, i*npc+(j+1)%npc+1, (i+1)*npc+(j+1)%npc+1, (i+1)*npc+(j+1)%npc+1);
+      AddSmoothTriangle(i*npc+j+1, i*npc+j+1, (i+1)*npc+(j+1)%npc+1, (i+1)*npc+(j+1)%npc+1, (i+1)*npc+j+1, (i+1)*npc+j+1);
     }
   }
   for (int j=0; j<npc; j++)
   {
-    t = Triangle(vertices[(nc-3)*npc+j+1], vertices[(nc-2)*npc+1], vertices[(nc-3)*npc+(j+1)%npc+1]);
-    normals.push_back(t.Normal());
-    AddTriangle((nc-3)*npc+j+1, (nc-2)*npc+1, (nc-3)*npc+(j+1)%npc+1, (nc-3)*npc+j+npc);
+    AddSmoothTriangle((nc-2)*npc+1, (nc-2)*npc+1, (nc-3)*npc+(j+1)%npc+1, (nc-3)*npc+(j+1)%npc+1, (nc-3)*npc+j+1, (nc-3)*npc+j+1);
   }
 
 }
@@ -302,9 +305,13 @@ Mesh::Mesh(const Cylinder& cylinder, int nh, int nr)
   // Reserve space for the triangle array
   varray.reserve(2 * nr * (nh - 2) * 3);
   narray.reserve(2 * nr * (nh - 2) * 3);
+  // Reserve space for the vertices and normals
+  vertices.reserve((nh - 2) * nr + 2);
+  normals.reserve((nh - 2) * nr + 2);
 
   // Create the vertices
   vertices.push_back(c + Vector(0, 0, h/2));
+  normals.push_back(Vector(0, 0, 1));
   for (int i=0; i<nh-2; i++)
   {
     double z = h/2 - h * i / (nh-3) ;
@@ -314,33 +321,28 @@ Mesh::Mesh(const Cylinder& cylinder, int nh, int nr)
       double x = r * cos(theta);
       double y = r * sin(theta);
       vertices.push_back(c + Vector(x, y, z));
+      normals.push_back(Vector(x, y, 0)/r);
     }
   }
   vertices.push_back(c + Vector(0, 0, -h/2));
+  normals.push_back(Vector(0, 0, -1));
 
   // Create the triangles and normals
-  Triangle t; // Temporary triangle to compute the normals
   for (int j=0; j<nr; j++)
   {
-    t = Triangle(vertices[0], vertices[j+1], vertices[(j+1)%nr+1]);
-    normals.push_back(t.Normal());
-    AddTriangle(0, j+1, (j+1)%nr+1, j);
+    AddTriangle(0, j+1, (j+1)%nr+1, 0);
   }
-  for (int i=1; i<nh-2; i++)
+  for (int i=0; i<nh-3; i++)
   {
     for (int j=0; j<nr; j++)
     {
-      t = Triangle(vertices[(i-1)*nr+j+1], vertices[i*nr+j+1], vertices[i*nr+(j+1)%nr+1]);
-      normals.push_back(t.Normal());
-      AddTriangle((i-1)*nr+j+1, i*nr+j+1, i*nr+(j+1)%nr+1, (i-1)*nr+j+nr);
-      AddTriangle((i-1)*nr+j+1, i*nr+(j+1)%nr+1, (i-1)*nr+(j+1)%nr+1, (i-1)*nr+j+nr);
+      AddSmoothTriangle(i*nr+j+1, i*nr+j+1, i*nr+(j+1)%nr+1, i*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1);
+      AddSmoothTriangle(i*nr+j+1, i*nr+j+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+j+1, (i+1)*nr+j+1);
     }
   }
   for (int j=0; j<nr; j++)
   {
-    t = Triangle(vertices[(nh-3)*nr+j+1], vertices[(nh-2)*nr+1], vertices[(nh-3)*nr+(j+1)%nr+1]);
-    normals.push_back(t.Normal());
-    AddTriangle((nh-3)*nr+j+1, (nh-2)*nr+1, (nh-3)*nr+(j+1)%nr+1, (nh-3)*nr+j+nr);
+    AddTriangle((nh-3)*nr+j+1, (nh-2)*nr+1, (nh-3)*nr+(j+1)%nr+1, (nh - 2)*nr+1);
   }
 
 }
@@ -379,9 +381,13 @@ Mesh::Mesh(const Capsule& capsule, int nh, int nr)
   // Reserve space for the triangle array
   varray.reserve(2 * nr * (nr + nh - 5) * 3);
   narray.reserve(2 * nr * (nr + nh - 5) * 3);
+  // Reserve space for the vertices and normals
+  vertices.reserve(nr * (nr + nh - 4) + 2);
+  normals.reserve(nr * (nr + nh - 4) + 2);
 
   // Create the vertices of the first half sphere
-  vertices.push_back(c + Vector(0, 0, r + h/2)); // north pole of the first half sphere
+  vertices.push_back(c + Vector(0, 0, r + h/2));
+  normals.push_back(Vector(0, 0, 1));
   for (int i=1; i<nr/2; i++)
   {
     double theta = M_PI * i / (nr-1);
@@ -393,6 +399,7 @@ Mesh::Mesh(const Capsule& capsule, int nh, int nr)
       double x = rho * cos(phi);
       double y = rho * sin(phi);
       vertices.push_back(c + Vector(0, 0, h/2) + Vector(x, y, z));
+      normals.push_back(Vector(x, y, z)/r);
     }
   }
   // Create the vertices of the inner cylinder
@@ -405,6 +412,7 @@ Mesh::Mesh(const Capsule& capsule, int nh, int nr)
       double x = r * cos(theta);
       double y = r * sin(theta);
       vertices.push_back(c + Vector(x, y, z));
+      normals.push_back(Vector(x, y, 0)/r);
     }
   }
   // Create the vertices of the second half sphere
@@ -418,35 +426,30 @@ Mesh::Mesh(const Capsule& capsule, int nh, int nr)
       double phi = 2 * M_PI * j / nr;
       double x = rho * cos(phi);
       double y = rho * sin(phi);
-      vertices.push_back(c + Vector(0, 0, -h/2) + Vector(x, y, z)); // translation
+      vertices.push_back(c + Vector(0, 0, -h/2) + Vector(x, y, z));
+      normals.push_back(Vector(x, y, z)/r);
     }
   }
-  vertices.push_back(c + Vector(0, 0, -r - h/2)); // south pole of the second half sphere
+  vertices.push_back(c + Vector(0, 0, -r - h/2));
+  normals.push_back(Vector(0, 0, -1));
 
 
   // Create the triangles and normals
-  Triangle t; // Temporary triangle to compute the normals
   for (int j=0; j<nr; j++)
   {
-    t = Triangle(vertices[0], vertices[j+1], vertices[(j+1)%nr+1]);
-    normals.push_back(t.Normal());
-    AddTriangle(0, j+1, (j+1)%nr+1, j);
+    AddSmoothTriangle(0, 0, j+1, j+1, (j+1)%nr+1, (j+1)%nr+1);
   }
-  for (int i=1; i<nr+nh-5; i++)
+  for (int i=0; i<nr+nh-6; i++)
   {
     for (int j=0; j<nr; j++)
     {
-      t = Triangle(vertices[(i-1)*nr+j+1], vertices[i*nr+j+1], vertices[i*nr+(j+1)%nr+1]);
-      normals.push_back(t.Normal());
-      AddTriangle((i-1)*nr+j+1, i*nr+j+1, i*nr+(j+1)%nr+1, (i-1)*nr+j+nr);
-      AddTriangle((i-1)*nr+j+1, i*nr+(j+1)%nr+1, (i-1)*nr+(j+1)%nr+1, (i-1)*nr+j+nr);
+      AddSmoothTriangle(i*nr+j+1, i*nr+j+1, i*nr+(j+1)%nr+1, i*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1);
+      AddSmoothTriangle(i*nr+j+1, i*nr+j+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+(j+1)%nr+1, (i+1)*nr+j+1, (i+1)*nr+j+1);
     }
   }
   for (int j=0; j<nr; j++)
   {
-    t = Triangle(vertices[(nr+nh-6)*nr+j+1], vertices[(nr+nh-5)*nr+1], vertices[(nr+nh-6)*nr+(j+1)%nr+1]);
-    normals.push_back(t.Normal());
-    AddTriangle((nr+nh-6)*nr+j+1, (nr+nh-5)*nr+1, (nr+nh-6)*nr+(j+1)%nr+1, (nr+nh-6)*nr+j+nr);
+    AddSmoothTriangle((nr+nh-6)*nr+j+1, (nr+nh-6)*nr+j+1, (nr+nh-6)*nr+(j+1)%nr+1, (nr+nh-6)*nr+(j+1)%nr+1, (nr+nh-5)*nr+1, (nr+nh-5)*nr+1);
   }
 
 }
@@ -460,6 +463,10 @@ The object has n*n vertices, n*n normals and 2*n*n triangles.
 */
 Mesh::Mesh(const Torus& torus, int nc, int npc)
 {
+  if (npc == -1)
+  {
+    npc = nc;
+  }
   if (nc < 3)
   {
     nc = 3;
@@ -472,8 +479,11 @@ Mesh::Mesh(const Torus& torus, int nc, int npc)
   double ro = torus.OuterRadius();
   Vector c = torus.Center();
   // Reserve space for the triangle array
-  varray.reserve(2 * nc * npc* 3);
+  varray.reserve(2 * nc * npc * 3);
   narray.reserve(2 * nc * npc * 3);
+  // Reserve space for the vertices and normals
+  vertices.reserve(nc * npc);
+  normals.reserve(nc * npc);
 
   // Create the vertices
   for (int i=0; i<nc; i++)
@@ -486,24 +496,104 @@ Mesh::Mesh(const Torus& torus, int nc, int npc)
       double y = (ri - ro * cos(u)) * sin(v);
       double x = (ri - ro * cos(u)) * cos(v);
       vertices.push_back(c + Vector(x, y, z));
+      double d = sqrt(x*x + y*y);
+      Vector normal = Vector(x, y, z)-Vector(x, y, 0)*ri/d;
+      normals.push_back(normal/Norm(normal));
     }
   }
 
   // Create the triangles and normals
-  Triangle t; // Temporary triangle to compute the normals
   for (int i=0; i<nc; i++)
   {
     for (int j=0; j<npc; j++)
     {
-      t = Triangle(vertices[i*npc+j], vertices[((i+1)%nc)*npc+j], vertices[((i+1)%nc)*npc+(j+1)%npc]);
-      normals.push_back(t.Normal());
-      AddTriangle(i*npc+j, ((i+1)%nc)*npc+j, ((i+1)%nc)*npc+(j+1)%npc, i*npc+j); // ajoute un triangle
-      AddTriangle(i*npc+j, ((i+1)%nc)*npc+(j+1)%npc, i*npc+(j+1)%npc, i*npc+j);
+      AddSmoothTriangle(i*npc+j, i*npc+j, (i+1)%nc*npc+j, (i+1)%nc*npc+j, (i+1)%nc*npc+(j+1)%npc, (i+1)%nc*npc+(j+1)%npc);
+      AddSmoothTriangle(i*npc+j, i*npc+j, (i+1)%nc*npc+(j+1)%npc, (i+1)%nc*npc+(j+1)%npc, i*npc+(j+1)%npc, i*npc+(j+1)%npc);
     }
   }
 }
 
 
+/*!
+\brief Creates a terrain mesh from an image.
+The object has width*height vertices, width*height normals and  2*(width-1)*(height-1) triangles.
+\param image_path The image path.
+\param scale The scale of the terrain.
+*/
+Mesh::Mesh(std::string image_path, double scale)
+{
+  QImage image("");
+  int width = image.width();
+  int height = image.height();
+  // Reserve space for the triangle array
+  varray.reserve(2 * (width - 1) * (height - 1) * 3);
+  narray.reserve(2 * (width - 1) * (height - 1) * 3);
+  // Reserve space for the vertices and normals
+  vertices.reserve(width * height);
+  normals.reserve(width * height);
+
+  // Create the vertices
+  for (int i=0; i<height; i++)
+  {
+    for (int j=0; j<width; j++)
+    {
+      vertices.push_back(Vector(10*double(j)/(width-1)-5, 10*double(i)/(height-1)-5, image.pixelIndex(i,j)/255.0*scale));
+    }
+  }
+
+  // Create the normals
+  Vector a, b, c, d, n;
+  for (int i=0; i<height; i++)
+  {
+    for (int j=0; j<width; j++)
+    {
+      if (i == 0)
+      {
+        a = vertices[i*width+j];
+      }
+      else
+      {
+        a = vertices[(i-1)*width+j];
+      }
+      if (i == height - 1)
+      {
+        d = vertices[i*width+j];
+      }
+      else
+      {
+        d = vertices[(i+1)*width+j];
+      }
+      if (j == 0)
+      {
+        b = vertices[i*width+j];
+      }
+      else
+      {
+        b = vertices[i*width+j-1];
+      }
+      if (j == width - 1)
+      {
+        c = vertices[i*width+j];
+      }
+      else
+      {
+        c = vertices[i*width+j+1];
+      }
+      n = (c - b) / (d - a);
+      normals.push_back(n/Norm(n));
+    }
+  }
+
+  // Create the triangles
+  for (int i=0; i<height-1; i++)
+  {
+    for (int j=0; j<width-1; j++)
+    {
+      AddSmoothTriangle(i*width+j, i*width+j, i*width+j+1, i*width+j+1, (i+1)*width+j+1, (i+1)*width+j+1);
+      AddSmoothTriangle(i*width+j, i*width+j, (i+1)*width+j+1, (i+1)*width+j+1, (i+1)*width+j, (i+1)*width+j);
+    }
+  }
+}
 
 /*!
 \brief Scale the mesh.
@@ -568,14 +658,18 @@ void Mesh::Rotate(const Matrix& rot)
   }
 }
 
-void Mesh::SphereWrap(const Sphere& sphere)
+void Mesh::SphereWrap(const Sphere& sphere, const Vector& vTrans)
 {
+  Vector vTransUnitary = vTrans;
   // Vertexes
+  Vector vTemp;
   for (int i = 0; i < vertices.size(); i++)
   {
-    vertices[i] = sphere.Wrap(vertices[i]);
+    sphere.Wrap(vTransUnitary, vertices[i], vTemp);
+    vertices[i] = vTemp;
   }
 }
+
 
 void Mesh::Merge(const Mesh& mesh1, const Mesh& mesh2)
 {

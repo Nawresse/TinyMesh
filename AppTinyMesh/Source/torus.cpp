@@ -41,7 +41,7 @@ Torus torus(Vector(0.0),1.0, 1.0);  // Simplified constructor Torus(1.0, 1.0);
 \endcode
 \param r Half side length.
 */
-Torus::Torus(double h, double r)
+Torus::Torus(double ri, double ro)
 {
   Torus::c = Vector(0.0);
   Torus::ri = abs(ri);

@@ -15,10 +15,9 @@ protected:
 public:
   //! Empty.
   Sphere() {}
-  Sphere(const Vector& c);
   explicit Sphere(const Vector&, double);
   explicit Sphere(double);
-
+  explicit Sphere(const Vector&);
   explicit Sphere(const std::vector<Vector>&);
 
   //! Empty.
@@ -43,7 +42,7 @@ public:
   void Scale(double);
 
   // Wrap
-  Vector Wrap(const Vector&) const;
+  void Wrap(const Vector& vTrans, const Vector& v, Vector& vTemp) const;
 
   friend std::ostream& operator<<(std::ostream&, const Sphere&);
 

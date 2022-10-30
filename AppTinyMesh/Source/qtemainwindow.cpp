@@ -38,7 +38,7 @@ void MainWindow::CreateActions()
     connect(uiw->mergedMesh, SIGNAL(clicked()), this, SLOT(MergedMesh()));
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
-    //connect(uiw->rotationPx, SIGNAL(clicked()), this, SLOT(RotationPx()));
+
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_2, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -84,7 +84,7 @@ void MainWindow::CapsuleMesh()
 }
 void MainWindow::TorusMesh()
 {
-    Torus torus = Torus(1.0,2.0);
+    Torus torus = Torus(1.0,0.5);
     Mesh torusMesh = Mesh(torus,31,31);
     meshColor = MeshColor(torusMesh);
     UpdateGeometry();
@@ -94,7 +94,7 @@ void MainWindow::TorusMesh()
 void MainWindow::MergedMesh()
 {
     Torus torus = Torus(Vector(0.0) , 2.0, 0.1);
-    Mesh torusMesh = Mesh(torus, 61);
+    Mesh torusMesh = Mesh(torus,20,61);
 
     Sphere sphere = Sphere(1.5);
     Mesh sphereMesh = Mesh(sphere, 31);
@@ -120,7 +120,7 @@ void MainWindow::WrappedMesh()
 
     Capsule capsule = Capsule(Vector(0.0) , 2.0, 1.0);
     Mesh capsuleMesh = Mesh(capsule, 31);
-    capsuleMesh.SphereWrap(sphere);
+    capsuleMesh.SphereWrap(sphere,Vector(-1.0));
 
     std::vector<Color> cols;
     cols.resize(capsuleMesh.Vertexes());

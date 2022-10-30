@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qimage.h>
+
 #include "box.h"
 #include "sphere.h"
 #include "cylinder.h"
@@ -7,6 +9,7 @@
 #include "torus.h"
 #include "ray.h"
 #include "mathematics.h"
+
 
 // Triangle
 class Triangle
@@ -122,7 +125,7 @@ public:
   void Translate(const Vector&);
   void Rotate(const Vector&, double);
   void Rotate(const Matrix&);
-  void SphereWrap(const Sphere&);
+  void SphereWrap(const Sphere& sphere, const Vector& vTrans);
 
   void Merge(const Mesh&, const Mesh&);
 
@@ -134,6 +137,8 @@ public:
   explicit Mesh(const Cylinder&, int = 31, int = -1);
   explicit Mesh(const Capsule&, int = 31, int = -1);
   explicit Mesh(const Torus&, int = 31,int = 31);
+  explicit Mesh(std::string, double);
+
 
   void Load(const QString&);
   void SaveObj(const QString&, const QString&) const;
