@@ -37,6 +37,7 @@ public slots:
   void UpdateMaterial();
   void MergedMesh();
   void WrappedMesh();
+  void TerrainMesh();
   //void RandomCamera();
   //void RotationPx();
 };

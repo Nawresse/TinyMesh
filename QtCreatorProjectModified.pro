@@ -16,6 +16,7 @@ SOURCES += \
     AppTinyMesh/Source/capsule.cpp \
     AppTinyMesh/Source/cylinder.cpp \
     AppTinyMesh/Source/evector.cpp \
+    AppTinyMesh/Source/heightfield.cpp \
     AppTinyMesh/Source/implicits.cpp \
     AppTinyMesh/Source/main.cpp \
     AppTinyMesh/Source/camera.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     AppTinyMesh/Include/capsule.h \
     AppTinyMesh/Include/color.h \
     AppTinyMesh/Include/cylinder.h \
+    AppTinyMesh/Include/heightfield.h \
     AppTinyMesh/Include/implicits.h \
     AppTinyMesh/Include/mathematics.h \
     AppTinyMesh/Include/mesh.h \

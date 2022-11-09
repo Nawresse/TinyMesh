@@ -210,6 +210,19 @@ p, li { white-space: pre-wrap; }
         <string>Merge Mesh</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="terrainMesh">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>380</y>
+         <width>93</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Terrain Mesh</string>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>

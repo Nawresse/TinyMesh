@@ -1,6 +1,7 @@
 #include "qte.h"
 #include "implicits.h"
 #include "ui_interface.h"
+#include "heightfield.h"
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -36,6 +37,8 @@ void MainWindow::CreateActions()
     connect(uiw->torusMesh, SIGNAL(clicked()), this, SLOT(TorusMesh()));
     connect(uiw->wrappedMesh, SIGNAL(clicked()), this, SLOT(WrappedMesh()));
     connect(uiw->mergedMesh, SIGNAL(clicked()), this, SLOT(MergedMesh()));
+
+    connect(uiw->terrainMesh, SIGNAL(clicked()), this, SLOT(TerrainMesh()));
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
 
@@ -66,6 +69,7 @@ void MainWindow::BoxMeshExample()
 void MainWindow::SphereMesh()
 {
     Sphere sphere = Sphere(Vector(1.0),1.0);
+    auto start = std::chrono::high_resolution_clock::now();
     Mesh sphereMesh = Mesh(sphere,31,31);
     meshColor = MeshColor(sphereMesh);
     UpdateGeometry();
@@ -180,4 +184,13 @@ void MainWindow::UpdateMaterial()
 void MainWindow::ResetCamera()
 {
 	meshWidget->SetCamera(Camera(Vector(-10.0), Vector(0.0)));
+}
+void MainWindow::TerrainMesh()
+{
+    std::string image_path = "C:\\Users\\Nawresse\\TinyMesh\\mt-taranaki.png";
+
+    HeightField terrainMesh;
+    terrainMesh = HeightField(image_path, 5.0);
+    meshColor = MeshColor(terrainMesh, 5.0, true);
+    UpdateGeometry();
 }

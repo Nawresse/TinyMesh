@@ -14,6 +14,8 @@ public:
   explicit MeshColor();
   explicit MeshColor(const Mesh&);
   explicit MeshColor(const Mesh&, const std::vector<Color>&, const std::vector<int>&);
+  explicit MeshColor(const Mesh&, double, bool = true);
+
   ~MeshColor();
 
   Color GetColor(int) const;

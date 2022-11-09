@@ -1,6 +1,7 @@
 #pragma once
 
-#include <qimage.h>
+
+
 
 #include "box.h"
 #include "sphere.h"
