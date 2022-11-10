@@ -2,6 +2,7 @@
 #include "implicits.h"
 #include "ui_interface.h"
 #include "heightfield.h"
+#include <chrono>
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -20,6 +21,7 @@ MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 
 	meshWidget->SetCamera(Camera(Vector(10, 0, 0), Vector(0.0, 0.0, 0.0)));
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -68,35 +70,51 @@ void MainWindow::BoxMeshExample()
 
 void MainWindow::SphereMesh()
 {
-    Sphere sphere = Sphere(Vector(1.0),1.0);
     auto start = std::chrono::high_resolution_clock::now();
+    Sphere sphere = Sphere(Vector(1.0),1.0);
     Mesh sphereMesh = Mesh(sphere,31,31);
     meshColor = MeshColor(sphereMesh);
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time of the sphere is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
 }
 void MainWindow::CylinderMesh()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     Mesh cylinderMesh = Mesh(Cylinder(Vector::Null));
     meshColor = MeshColor(cylinderMesh);
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time of the cylinder is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
 }
 void MainWindow::CapsuleMesh()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     Mesh capsuleMesh = Mesh(Capsule(Vector::Null));
     meshColor = MeshColor(capsuleMesh);
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time of the capsul is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
 }
 void MainWindow::TorusMesh()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     Torus torus = Torus(1.0,0.5);
     Mesh torusMesh = Mesh(torus,31,31);
     meshColor = MeshColor(torusMesh);
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time of the torus is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
 
 }
 
 void MainWindow::MergedMesh()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     Torus torus = Torus(Vector(0.0) , 2.0, 0.1);
     Mesh torusMesh = Mesh(torus,20,61);
 
@@ -113,12 +131,16 @@ void MainWindow::MergedMesh()
 
     meshColor = MeshColor(mergedMesh, cols, mergedMesh.VertexIndexes());
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
+
 
 }
 
 void MainWindow::WrappedMesh()
 {
-
+    auto start = std::chrono::high_resolution_clock::now();
     Sphere sphere = Sphere(1);
     sphere.Translate(Vector(0.5, 0.0, 0.0));
 
@@ -133,15 +155,12 @@ void MainWindow::WrappedMesh()
 
     meshColor = MeshColor(capsuleMesh, cols, capsuleMesh.VertexIndexes());
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
+
 
 }
-/*void MainWindow::RandomCamera()
-{
-    double theta = 2.0 * M_PI/12;
-    Vector axis = Vector::X; // l'axe unitaire selon X
-    Vector currentView
-    meshWidget->SetCamera(Camera(Matrix(axis, theta) * Vector(-10.0), Vector(0.0)));
-}*/
 
 void MainWindow::SphereImplicitExample()
 {
@@ -187,10 +206,15 @@ void MainWindow::ResetCamera()
 }
 void MainWindow::TerrainMesh()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     std::string image_path = "C:\\Users\\Nawresse\\TinyMesh\\mt-taranaki.png";
 
     HeightField terrainMesh;
     terrainMesh = HeightField(image_path, 5.0);
     meshColor = MeshColor(terrainMesh, 5.0, true);
     UpdateGeometry();
+    auto stop =std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout<<"The generation time is equal to : "<<duration.count()<<"ms\n======"<<std::endl;
+
 }

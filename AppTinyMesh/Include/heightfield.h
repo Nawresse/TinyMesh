@@ -14,4 +14,5 @@ public:
     // Constructors from image
     explicit HeightField(std::string, double);
     ~HeightField();
+    //
 };
