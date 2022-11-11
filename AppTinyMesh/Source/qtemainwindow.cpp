@@ -211,7 +211,8 @@ void MainWindow::TerrainMesh()
 
     HeightField terrainMesh;
     terrainMesh = HeightField(image_path, 5.0);
-    meshColor = MeshColor(terrainMesh, 5.0, true);
+   // meshColor = MeshColor(terrainMesh, 5.0, true); true pour applatir la mer
+    meshColor = MeshColor(terrainMesh, 5.0, false);
     UpdateGeometry();
     auto stop =std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);

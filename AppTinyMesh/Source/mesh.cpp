@@ -628,7 +628,9 @@ void Mesh::Merge(const Mesh& mesh1, const Mesh& mesh2)
     narray.push_back(mesh2.narray[i] + nn1);
   }
 }
-
+/*void Mesh:: flatten(Vector c, double r, double h){
+    for (int i = 0;< i<)
+}*/
 
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
